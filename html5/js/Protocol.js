@@ -672,6 +672,9 @@ if (
     window.document === document
   )
 ) {
+  // WebRTC shim must load before anything else — patches self.WebSocket
+  // so XpraProtocol transparently uses the DataChannel bridge.
+  importScripts("WebRTCWorkerShim.js");
   // some required imports
   // worker imports are relative to worker script path
   importScripts(
