@@ -5,11 +5,9 @@ body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background-color: #021d3a;
-  background-image: url(../background.jpg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  /* [bitapify] neutral background for embedded iframe */
+  background-color: #ffffff;
+  background-image: none;
 }
 
 div.window canvas {

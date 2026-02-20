@@ -698,6 +698,9 @@ class XpraClient {
   }
 
   clear_timers() {
+    // [bitapify] open_timer was missing — leaked timers from prior connect()
+    // calls (via init_state nulling the reference) would fire and kill live connections.
+    this.cancel_open_timer();
     this.stop_info_timer();
     this.cancel_hello_timer();
     if (this.ping_timer) {

@@ -72,7 +72,7 @@
   window.Worker = function(url, options) {
     var worker = new OriginalWorker(url, options);
 
-    if (typeof url === "string" && url.indexOf("Protocol") !== -1) {
+    if (typeof url === "string" && url.indexOf("Protocol") !== -1 && state !== "failed") {
       console.log("[WebRTCShim] Intercepted Protocol Worker, setting up MessagePort bridge");
 
       var channel = new MessageChannel();
@@ -83,9 +83,7 @@
       worker.postMessage({__type: "webrtc-init"}, [channel.port2]);
 
       // Notify Worker of current state
-      if (state === "failed") {
-        workerPort.postMessage({type: "fallback"});
-      } else if (state === "ready" && dataChannel && dataChannel.readyState === "open") {
+      if (state === "ready" && dataChannel && dataChannel.readyState === "open") {
         workerPort.postMessage({type: "open"});
       }
       // Otherwise state is "setup" — Worker will wait for "open" or "fallback"

@@ -780,8 +780,13 @@ class XpraWindow {
       this.set_maximized(Boolean(metadata["maximized"]));
     }
     if ("decorations" in metadata) {
-      this.decorations = Boolean(metadata["decorations"]);
-      this._set_decorated(this.decorations);
+      // [bitapify] Force decorations off — xpra is embedded in an iframe,
+      // window title bars are not needed and waste vertical space.
+      // Original:
+      //   this.decorations = Boolean(metadata["decorations"]);
+      //   this._set_decorated(this.decorations);
+      this.decorations = false;
+      this._set_decorated(false);
       this.updateCSSGeometry();
       this.handle_resized();
       this.apply_size_constraints();

@@ -696,7 +696,7 @@
         const scroll_reverse_x = getboolparam("scroll_reverse_x", false);
         const scroll_reverse_y = getboolautoparam("scroll_reverse_y", null);
         const middle_emulation_modifier = getstrparam("middle_emulation_modifier") || "";
-        const floating_menu = getboolparam("floating_menu", true);
+        const floating_menu = getboolparam("floating_menu", false);
         const toolbar_position = getstrparam("toolbar_position");
         const autohide = getboolparam("autohide", false);
         const override_width = getfloatparam("override_width", window.innerWidth);
@@ -1383,7 +1383,7 @@
 
       function init_float_menu() {
         const toolbar_position = getstrparam("toolbar_position");
-        const floating_menu = getboolparam("floating_menu", true);
+        const floating_menu = getboolparam("floating_menu", false);
         const autohide = getboolparam("autohide", false);
         const float_menu_element = $("#float_menu");
         if (toolbar_position === "novnc") {
