@@ -2,6 +2,8 @@
  * Copyright (c) 2021 Antoine Martin <antoine@xpra.org>
  */
 
+console.info = function(){};
+
 importScripts("./lib/lz4.js");
 importScripts("./RgbHelpers.js");
 

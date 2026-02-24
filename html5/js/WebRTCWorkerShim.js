@@ -28,6 +28,8 @@
   var shimState = "waiting"; // "waiting" | "ready" | "failed"
   var activeShim = null;
   var pendingShim = null;
+  var DEBUG = false;
+  function log() { if (DEBUG) console.log.apply(console, arguments); }
 
   // ── Intercept port transfer from main thread ──────────────────────
   // This listener is added before Protocol.js's listener, so it fires
@@ -39,13 +41,14 @@
 
     dcPort = e.ports[0];
     shimState = "waiting";
-    console.log("[WebRTCWorkerShim] Port received from main thread");
+    DEBUG = !!e.data.debug;
+    log("[WebRTCWorkerShim] Port received from main thread");
 
     dcPort.onmessage = function(ev) {
       var msg = ev.data;
       switch (msg.type) {
         case "open":
-          console.log("[WebRTCWorkerShim] DataChannel open");
+          log("[WebRTCWorkerShim] DataChannel open");
           shimState = "ready";
           if (pendingShim) {
             activateShim(pendingShim);
@@ -61,7 +64,7 @@
           break;
 
         case "close":
-          console.log("[WebRTCWorkerShim] DataChannel closed, code=" + msg.code);
+          log("[WebRTCWorkerShim] DataChannel closed, code=" + msg.code);
           shimState = "waiting";
           if (activeShim) fireClose(activeShim, msg.code || 1006, msg.reason || "");
           if (pendingShim) fireClose(pendingShim, msg.code || 1006, msg.reason || "");
@@ -125,11 +128,11 @@
 
   function WorkerDataChannelWebSocket(url, protocols) {
     if (shimState === "failed" || !dcPort) {
-      console.log("[WebRTCWorkerShim] new WebSocket() → real WebSocket (state=" + shimState + " port=" + !!dcPort + ")");
+      log("[WebRTCWorkerShim] new WebSocket() → real WebSocket (state=" + shimState + " port=" + !!dcPort + ")");
       return new OriginalWebSocket(url, protocols);
     }
 
-    console.log("[WebRTCWorkerShim] new WebSocket() → DataChannel shim (state=" + shimState + ")");
+    log("[WebRTCWorkerShim] new WebSocket() → DataChannel shim (state=" + shimState + ")");
 
     this.url = url;
     this.protocol = (typeof protocols === "string")
@@ -209,5 +212,5 @@
   self.WebSocket.CLOSING = 2;
   self.WebSocket.CLOSED = 3;
 
-  console.log("[WebRTCWorkerShim] Worker WebSocket patched");
+  log("[WebRTCWorkerShim] Worker WebSocket patched");
 })();

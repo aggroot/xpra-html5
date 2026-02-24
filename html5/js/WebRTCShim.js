@@ -33,10 +33,14 @@
 
   // ── Activation gate ──────────────────────────────────────────────────
 
-  var transport = new URLSearchParams(window.location.search).get("transport");
+  var params = new URLSearchParams(window.location.search);
+  var transport = params.get("transport");
   if (transport !== "webrtc") {
     return;
   }
+
+  var DEBUG = params.has("debug");
+  function log() { if (DEBUG) console.log.apply(console, arguments); }
 
   // ── Configuration ────────────────────────────────────────────────────
 
@@ -44,16 +48,16 @@
   var MSG_TYPE_TEXT = 1;
   var MSG_TYPE_BINARY = 2;
   var MSG_TYPE_CHUNK = 3;
-  var DATACHANNEL_TIMEOUT = 15000;
+  var DATACHANNEL_TIMEOUT = 5000;
   var ICE_GATHER_TIMEOUT = 5000;
 
   var pathMatch = window.location.pathname.match(/\/session\/([^/]+)\/xpra/);
   if (!pathMatch) {
-    console.log("[WebRTCShim] Not in session context, skipping");
+    log("[WebRTCShim] Not in session context, skipping");
     return;
   }
   var SESSION_ID = pathMatch[1];
-  console.log("[WebRTCShim] Session:", SESSION_ID, "transport: webrtc");
+  log("[WebRTCShim] Session:", SESSION_ID, "transport: webrtc");
 
   // ── Shared state ─────────────────────────────────────────────────────
 
@@ -73,14 +77,14 @@
     var worker = new OriginalWorker(url, options);
 
     if (typeof url === "string" && url.indexOf("Protocol") !== -1 && state !== "failed") {
-      console.log("[WebRTCShim] Intercepted Protocol Worker, setting up MessagePort bridge");
+      log("[WebRTCShim] Intercepted Protocol Worker, setting up MessagePort bridge");
 
       var channel = new MessageChannel();
       workerPort = channel.port1;
       setupWorkerBridge(workerPort);
 
       // Transfer port2 to the Worker (received by WebRTCWorkerShim.js)
-      worker.postMessage({__type: "webrtc-init"}, [channel.port2]);
+      worker.postMessage({__type: "webrtc-init", debug: DEBUG}, [channel.port2]);
 
       // Notify Worker of current state
       if (state === "ready" && dataChannel && dataChannel.readyState === "open") {
@@ -162,7 +166,7 @@
       // Mid-session failure — retry WebRTC immediately
       retriesLeft--;
       if (workerPort) workerPort.postMessage({type: "close", code: 1006, reason: reason});
-      console.log("[WebRTCShim] Retrying WebRTC...");
+      log("[WebRTCShim] Retrying WebRTC...");
       state = "setup";
       setupWebRTC();
     } else {
@@ -324,9 +328,9 @@
       bindDataChannel(dc);
 
       if (peerConnection.sctp) {
-        console.log("[WebRTCShim] SCTP maxMessageSize:", peerConnection.sctp.maxMessageSize);
+        log("[WebRTCShim] SCTP maxMessageSize:", peerConnection.sctp.maxMessageSize);
       }
-      console.log("[WebRTCShim] DataChannel open — WebRTC active");
+      log("[WebRTCShim] DataChannel open — WebRTC active");
 
       // Notify Worker that DC is ready
       if (workerPort) {
