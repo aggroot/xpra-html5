@@ -562,6 +562,7 @@ class XpraClient {
       this.offscreen_api = DECODE_WORKER && XpraOffscreenWorker.isAvailable(this.ssl);
     }
 
+    this.offscreen_api = false
     if (this.offscreen_api) {
       this.clog("initializing offscreen decode worker");
       decode_worker = new Worker("js/OffscreenDecodeWorker.js");
